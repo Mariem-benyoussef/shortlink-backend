@@ -21,7 +21,10 @@ class GoogleAnalyticsService
         ]);
     }
 
-    public function getReport()
+    /**
+     * Récupère un rapport personnalisé en fonction des métriques et dimensions spécifiées.
+     */
+    public function getReport(array $metrics, array $dimensions, string $startDate = '30daysAgo', string $endDate = 'today')
     {
         try {
             // Remplacez par votre propertyId GA4 (ex: 'properties/123456789')
@@ -29,30 +32,28 @@ class GoogleAnalyticsService
 
             // Plage de dates
             $dateRange = new DateRange([
-                'start_date' => '30daysAgo', // Période : 30 derniers jours
-                'end_date' => 'today',
+                'start_date' => $startDate,
+                'end_date' => $endDate,
             ]);
 
-            // Exemple de métriques
-            $metricUsers = new Metric([
-                'name' => 'activeUsers', // Nombre d'utilisateurs actifs
-            ]);
+            // Convertir les métriques en objets Metric
+            $metricObjects = [];
+            foreach ($metrics as $metric) {
+                $metricObjects[] = new Metric(['name' => $metric]);
+            }
 
-            $metricSessions = new Metric([
-                'name' => 'sessions', // Nombre de sessions
-            ]);
-
-            // Exemple de dimension
-            $dimensionDate = new Dimension([
-                'name' => 'date', // Dimension de la date
-            ]);
+            // Convertir les dimensions en objets Dimension
+            $dimensionObjects = [];
+            foreach ($dimensions as $dimension) {
+                $dimensionObjects[] = new Dimension(['name' => $dimension]);
+            }
 
             // Créer la requête de rapport
             $request = new RunReportRequest([
                 'property' => $propertyId,
                 'date_ranges' => [$dateRange],
-                'metrics' => [$metricUsers, $metricSessions],
-                'dimensions' => [$dimensionDate],
+                'metrics' => $metricObjects,
+                'dimensions' => $dimensionObjects,
             ]);
 
             // Récupérer le rapport
@@ -61,15 +62,14 @@ class GoogleAnalyticsService
             // Traiter et retourner les résultats
             $result = [];
             foreach ($response->getRows() as $row) {
-                $date = $row->getDimensionValues()[0]->getValue();
-                $users = $row->getMetricValues()[0]->getValue();
-                $sessions = $row->getMetricValues()[1]->getValue();
-
-                $result[] = [
-                    'date' => $date,
-                    'users' => $users,
-                    'sessions' => $sessions,
-                ];
+                $rowData = [];
+                foreach ($row->getDimensionValues() as $dimensionValue) {
+                    $rowData[] = $dimensionValue->getValue();
+                }
+                foreach ($row->getMetricValues() as $metricValue) {
+                    $rowData[] = $metricValue->getValue();
+                }
+                $result[] = $rowData;
             }
 
             return $result;
@@ -77,5 +77,70 @@ class GoogleAnalyticsService
             // Gérer les erreurs d'API
             throw new \Exception('Erreur Google Analytics API : ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Stats par clic.
+     */
+    public function getClickStats(string $startDate = '30daysAgo', string $endDate = 'today')
+    {
+        return $this->getReport(
+            ['eventCount'], // Métriques
+            ['eventName'],   // Dimensions
+            $startDate,
+            $endDate
+        );
+    }
+
+    /**
+     * Stats par jour.
+     */
+    public function getDailyStats(string $startDate = '30daysAgo', string $endDate = 'today')
+    {
+        return $this->getReport(
+            ['activeUsers', 'sessions'], // Métriques
+            ['date'],                     // Dimensions
+            $startDate,
+            $endDate
+        );
+    }
+
+    /**
+     * Stats par source.
+     */
+    public function getSourceStats(string $startDate = '30daysAgo', string $endDate = 'today')
+    {
+        return $this->getReport(
+            ['sessions'], // Métriques
+            ['source'],   // Dimensions
+            $startDate,
+            $endDate
+        );
+    }
+
+    /**
+     * Stats par type d'appareil.
+     */
+    public function getDeviceStats(string $startDate = '30daysAgo', string $endDate = 'today')
+    {
+        return $this->getReport(
+            ['sessions'],      // Métriques
+            ['deviceCategory'], // Dimensions
+            $startDate,
+            $endDate
+        );
+    }
+
+    /**
+     * Liens les plus performants.
+     */
+    public function getTopLinks(string $startDate = '30daysAgo', string $endDate = 'today')
+    {
+        return $this->getReport(
+            ['eventCount'], // Métriques
+            ['pagePath'],  // Dimensions
+            $startDate,
+            $endDate
+        );
     }
 }
