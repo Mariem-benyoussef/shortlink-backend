@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GoogleAnalyticsController;
+use App\Http\Controllers\ShortlinkController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,3 +20,4 @@ Route::get('/', function () {
 });
 
 Route::get('/analytics', [GoogleAnalyticsController::class, 'index']);
+
