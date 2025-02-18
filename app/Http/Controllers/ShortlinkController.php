@@ -33,7 +33,7 @@ class ShortlinkController extends Controller
         $shortlink = Shortlink::create($validated);
 
         // Retourner la réponse JSON avec le shortlink créé
-        return response()->json($shortlink, 201);
+        return response()->json($shortlink);
     }
 
     // Afficher un shortlink spécifique (en tant qu'API)
