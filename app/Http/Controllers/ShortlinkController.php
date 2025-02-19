@@ -17,7 +17,6 @@ class ShortlinkController extends Controller
     // Créer un nouveau shortlink (en tant qu'API)
     public function store(Request $request)
     {
-        // Validation des données
         $validated = $request->validate([
             'destination' => 'required|url',
             'titre' => 'nullable|string',
@@ -29,11 +28,9 @@ class ShortlinkController extends Controller
             'utm_content' => 'nullable|string',
         ]);
 
-        // Créer un nouveau shortlink
         $shortlink = Shortlink::create($validated);
 
-        // Retourner la réponse JSON avec le shortlink créé
-        return response()->json($shortlink);
+        return response()->json(['message' => 'Lien créé avec succès!', 'data' => $shortlink]);
     }
 
     // Afficher un shortlink spécifique (en tant qu'API)
@@ -79,5 +76,17 @@ class ShortlinkController extends Controller
 
         // Retourner une réponse de succès
         return response()->json(['message' => 'Shortlink deleted successfully']);
+    }
+
+
+    // Vérifier si le chemin personnalisé est unique
+    public function checkCheminUnique(Request $request)
+    {
+        $chemin = $request->input('chemin_personnalise');
+
+        // Vérifier si le chemin est déjà utilisé
+        $exists = Shortlink::where('chemin_personnalise', $chemin)->exists();
+
+        return response()->json(['isUnique' => !$exists]);
     }
 }

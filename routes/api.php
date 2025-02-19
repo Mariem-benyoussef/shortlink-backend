@@ -25,3 +25,4 @@ Route::post('shortlinks', [ShortlinkController::class, 'store']);
 Route::get('shortlinks/{id}', [ShortlinkController::class, 'show']);
 Route::put('shortlinks/{id}', [ShortlinkController::class, 'update']);
 Route::delete('shortlinks/{id}', [ShortlinkController::class, 'destroy']);
+Route::post('/check-chemin-unique', [ShortlinkController::class, 'checkCheminUnique']);

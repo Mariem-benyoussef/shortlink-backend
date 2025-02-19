@@ -20,4 +20,3 @@ Route::get('/', function () {
 });
 
 Route::get('/analytics', [GoogleAnalyticsController::class, 'index']);
-
