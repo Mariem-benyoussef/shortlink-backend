@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Services\GoogleAnalyticsService;
 
 class GoogleAnalyticsController extends Controller
@@ -43,15 +44,34 @@ class GoogleAnalyticsController extends Controller
     //     }
     // }
 
-    public function index()
+    // public function index()
+    // {
+    //     try {
+    //         return response()->json([
+    //             'clickStats' => $this->analyticsService->getClickStats(),
+    //             'dailyStats' => $this->analyticsService->getDailyStats(),
+    //             'sourceStats' => $this->analyticsService->getSourceStats(),
+    //             'deviceStats' => $this->analyticsService->getDeviceStats(),
+    //             'topLinks' => $this->analyticsService->getTopLinks(),
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+
+    public function index(Request $request)
     {
         try {
+            $destination = $request->input('destination', '/mon-shortlink');
+
             return response()->json([
                 'clickStats' => $this->analyticsService->getClickStats(),
                 'dailyStats' => $this->analyticsService->getDailyStats(),
                 'sourceStats' => $this->analyticsService->getSourceStats(),
                 'deviceStats' => $this->analyticsService->getDeviceStats(),
                 'topLinks' => $this->analyticsService->getTopLinks(),
+                'shortlinkStats' => $this->analyticsService->getShortlinkStats($destination),
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
