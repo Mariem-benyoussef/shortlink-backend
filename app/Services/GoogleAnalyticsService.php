@@ -27,7 +27,6 @@ class GoogleAnalyticsService
     public function getReport(array $metrics, array $dimensions, string $startDate = '30daysAgo', string $endDate = 'today')
     {
         try {
-            // Remplacez par votre propertyId GA4 (ex: 'properties/123456789')
             $propertyId = 'properties/' . env('GOOGLE_ANALYTICS_PROPERTY_ID');
 
             // Plage de dates

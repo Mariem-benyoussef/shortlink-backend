@@ -11,7 +11,7 @@
         "php": "^8.0.2",
         "google/analytics-data": "^0.22.2",
         "google/apiclient": "^2.18",
-        "guzzlehttp/guzzle": "^7.2",
+        "guzzlehttp/guzzle": "^7.9",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7"

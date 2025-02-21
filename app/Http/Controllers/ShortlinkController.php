@@ -89,4 +89,14 @@ class ShortlinkController extends Controller
 
         return response()->json(['isUnique' => !$exists]);
     }
+
+    public function checkDestinationUnique(Request $request)
+    {
+        $destination = $request->input('destination');
+
+        // Vérifier si le chemin est déjà utilisé
+        $exists = Shortlink::where('destination', $destination)->exists();
+
+        return response()->json(['isUnique' => !$exists]);
+    }
 }
