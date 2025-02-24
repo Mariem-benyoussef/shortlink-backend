@@ -3,10 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shortlink;
+use App\Services\GoogleAnalyticsService;
 use Illuminate\Http\Request;
 
 class ShortlinkController extends Controller
 {
+    protected $analyticsService;
+
+    public function __construct(GoogleAnalyticsService $analyticsService)
+    {
+        $this->analyticsService = $analyticsService;
+    }
+
     // Afficher la liste des shortlinks (en tant qu'API)
     public function index()
     {
@@ -98,5 +106,28 @@ class ShortlinkController extends Controller
         $exists = Shortlink::where('destination', $destination)->exists();
 
         return response()->json(['isUnique' => !$exists]);
+    }
+
+
+
+    public function showShortlinkDetails(Request $request, string $destination)
+    {
+        // Check if the destination exists in the database (shortlinks table)
+        // $shortlink = Shortlink::where('destination', $destination)->first();
+
+        // if (!$shortlink) {
+        //     return response()->json(['error' => 'Shortlink does not exist in the database'], 404);
+        // }
+
+        try {
+            $shortlinkInfo = $this->analyticsService->getShortlinkInfoFromGA($destination);
+
+            return response()->json([
+                'destination' => $destination,
+                'info' => $shortlinkInfo,
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'Analytics data unavailable.', 'message' => $e->getMessage()], 500);
+        }
     }
 }
