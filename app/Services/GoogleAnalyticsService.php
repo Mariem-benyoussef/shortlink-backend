@@ -29,82 +29,11 @@ class GoogleAnalyticsService
     /**
      * Récupère un rapport personnalisé en fonction des métriques et dimensions spécifiées.
      */
-    // public function getReport(
-    //     array $metrics,
-    //     array $dimensions,
-    //     string $startDate = '30daysAgo',
-    //     string $endDate = 'today',
-    //     string $filterDimension = '',
-    //     string $filterValue = ''
-    // ): array {
-    //     try {
-    //         // Plage de dates
-    //         $dateRange = new DateRange([
-    //             'start_date' => $startDate,
-    //             'end_date' => $endDate,
-    //         ]);
-
-    //         // Convertir les métriques en objets Metric
-    //         $metricObjects = array_map(function ($metric) {
-    //             return new Metric(['name' => $metric]);
-    //         }, $metrics);
-
-    //         // Convertir les dimensions en objets Dimension
-    //         $dimensionObjects = array_map(function ($dimension) {
-    //             return new Dimension(['name' => $dimension]);
-    //         }, $dimensions);
-
-    //         // Créer la requête de rapport
-    //         $request = new RunReportRequest([
-    //             'property' => $this->propertyId,
-    //             'date_ranges' => [$dateRange],
-    //             'metrics' => $metricObjects,
-    //             'dimensions' => $dimensionObjects,
-    //         ]);
-
-    //         // Ajouter un filtre de dimension si fourni
-    //         if ($filterDimension && $filterValue) {
-    //             $stringFilter = new StringFilter([
-    //                 'value' => $filterValue,
-    //             ]);
-
-    //             $dimensionFilter = new FilterExpression([
-    //                 'filter' => new Filter([
-    //                     'field_name' => $filterDimension, // 'pageLocation'
-    //                     'string_filter' => $stringFilter,
-    //                 ]),
-    //             ]);
-
-    //             $request->setDimensionFilter($dimensionFilter);
-    //         }
-
-    //         // Récupérer le rapport
-    //         $response = $this->client->runReport($request);
-
-    //         // Traiter et retourner les résultats
-    //         $result = [];
-    //         foreach ($response->getRows() as $row) {
-    //             $rowData = [];
-    //             foreach ($row->getDimensionValues() as $dimensionValue) {
-    //                 $rowData[] = $dimensionValue->getValue();
-    //             }
-    //             foreach ($row->getMetricValues() as $metricValue) {
-    //                 $rowData[] = $metricValue->getValue();
-    //             }
-    //             $result[] = $rowData;
-    //         }
-
-    //         return $result;
-    //     } catch (ApiException $e) {
-    //         // Gérer les erreurs d'API
-    //         throw new \Exception('Erreur Google Analytics API : ' . $e->getMessage());
-    //     }
-    // }
     public function getReport(
         array $metrics,
         array $dimensions,
-        string $startDate = '30daysAgo',
-        string $endDate = 'today',
+        string $startDate = '2025-01-26',
+        string $endDate = '2025-02-24',
         string $filterDimension = '',
         string $filterValue = ''
     ): array {
@@ -179,77 +108,11 @@ class GoogleAnalyticsService
             throw new \Exception('Erreur Google Analytics API : ' . $e->getMessage());
         }
     }
-    /**
-     * Récupère les informations du shortlink (comme la destination) à partir de Google Analytics.
-     */
-    // public function getShortlinkInfoFromGA(string $destination, string $startDate = '30daysAgo', string $endDate = 'today'): array
-    // {
-    //     // Définir les métriques et dimensions à récupérer
-    //     $metrics = ['eventCount']; // Nombre de clics
-    //     $dimensions = ['pagePath', 'pageLocation']; // Chemin de la page et URL complète
 
-    //     // Appeler getReport avec la destination comme filtre
-    //     $results = $this->getReport(
-    //         $metrics,
-    //         $dimensions,
-    //         $startDate,
-    //         $endDate,
-    //         'pageLocation', // Filtrer par l'URL complète (destination)
-    //         $destination // Utiliser la destination comme valeur de filtre
-    //     );
-
-    //     // Log des résultats pour déboguer
-    //     // \Log::info('Résultats de Google Analytics : ', $results);
-
-    //     // Traiter les résultats
-    //     $shortlinkInfo = [];
-    //     foreach ($results as $row) {
-    //         $shortlinkInfo[] = [
-    //             'pagePath' => $row[0], // Chemin de la page (shortlink)
-    //             'pageLocation' => $row[1], // URL complète (destination)
-    //             'eventCount' => $row[2], // Nombre d'événements (clics)
-    //         ];
-    //     }
-
-    //     return $shortlinkInfo;
-    // }
-
-
-    // public function getShortlinkInfoFromGA(string $destination, string $startDate = '30daysAgo', string $endDate = 'today'): array
-    // {
-    //     // Définir les métriques et dimensions à récupérer
-    //     $metrics = ['screenPageViews']; // Métrique compatible
-    //     $dimensions = ['date']; // Dimension simple
-
-    //     // Appeler getReport sans filtre
-    //     $results = $this->getReport(
-    //         $metrics,
-    //         $dimensions,
-    //         $startDate,
-    //         $endDate,
-    //         'pageLocation',
-    //         $destination
-
-    //     );
-
-    //     // Traiter les résultats
-    //     $shortlinkInfo = [];
-    //     foreach ($results as $row) {
-    //         $shortlinkInfo[] = [
-    //             'date' => $row[0],           // Date
-    //             'screenPageViews' => $row[1], // Nombre de vues de page
-    //         ];
-    //     }
-
-    //     return $shortlinkInfo;
-    // }
-
-
-
-    public function getShortlinkInfoFromGA(string $destination, string $startDate = '30daysAgo', string $endDate = 'today'): array
+    public function getShortlinkInfoFromGA(string $destination, string $startDate = '2025-01-26', string $endDate = '2025-02-24'): array
     {
         // Définir les métriques et dimensions à récupérer
-        $metrics = ['screenPageViews']; // Métrique compatible
+        $metrics = ['screenPageViewsPerUser']; // Métrique compatible
         $dimensions = [
             'city',            // Ville
             'country',         // Pays
@@ -277,24 +140,13 @@ class GoogleAnalyticsService
                 'date' => $row['dimensions'][2],          // Date
                 'deviceCategory' => $row['dimensions'][3], // Type d'appareil
                 'sessionSource' => $row['dimensions'][4], // Source de la session
-                'screenPageViews' => $row['metrics'][0],     // Nombre de vues de page
+                'screenPageViewsPerUser' => $row['metrics'][0],     // Nombre de vues de page
             ];
         }
 
         return $shortlinkInfo;
     }
-
-
-
-
-
-
-
-
-
-
-
-    public function getShortlinkStats(string $destination, string $startDate = '30daysAgo', string $endDate = 'today'): array
+    public function getShortlinkStats(string $destination, string $startDate = '2025-01-26', string $endDate = '2025-02-24'): array
     {
         try {
             $propertyId = 'properties/' . env('GOOGLE_ANALYTICS_PROPERTY_ID');
@@ -352,12 +204,10 @@ class GoogleAnalyticsService
         }
     }
 
-
-
     /**
      * Stats par clic.
      */
-    public function getClickStats(string $startDate = '30daysAgo', string $endDate = 'today')
+    public function getClickStats(string $startDate = '2025-01-26', string $endDate = '2025-02-24')
     {
         return $this->getReport(
             ['eventCount'], // Métriques
@@ -370,7 +220,7 @@ class GoogleAnalyticsService
     /**
      * Stats par jour.
      */
-    public function getDailyStats(string $startDate = '30daysAgo', string $endDate = 'today')
+    public function getDailyStats(string $startDate = '2025-01-26', string $endDate = '2025-02-24')
     {
         return $this->getReport(
             ['activeUsers', 'sessions'], // Métriques
@@ -383,7 +233,7 @@ class GoogleAnalyticsService
     /**
      * Stats par source.
      */
-    public function getSourceStats(string $startDate = '30daysAgo', string $endDate = 'today')
+    public function getSourceStats(string $startDate = '2025-01-26', string $endDate = '2025-02-24')
     {
         return $this->getReport(
             ['sessions'], // Métriques
@@ -396,7 +246,7 @@ class GoogleAnalyticsService
     /**
      * Stats par type d'appareil.
      */
-    public function getDeviceStats(string $startDate = '30daysAgo', string $endDate = 'today')
+    public function getDeviceStats(string $startDate = '2025-01-26', string $endDate = '2025-02-24')
     {
         return $this->getReport(
             ['sessions'],      // Métriques
@@ -409,7 +259,7 @@ class GoogleAnalyticsService
     /**
      * Liens les plus performants.
      */
-    public function getTopLinks(string $startDate = '30daysAgo', string $endDate = 'today')
+    public function getTopLinks(string $startDate = '2025-01-26', string $endDate = '2025-02-24')
     {
         return $this->getReport(
             ['eventCount'], // Métriques
