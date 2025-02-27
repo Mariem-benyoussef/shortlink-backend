@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ShortlinkController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,5 +32,10 @@ Route::post('/check-destination-unique', [ShortlinkController::class, 'checkDest
 
 Route::get('/shortlinks/destination/{destination}', [ShortlinkController::class, 'showShortlinkDetails'])
     ->where('destination', 'https?://.+');
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 // Route::get('/shortlinks/destination/{destination}', [ShortlinkController::class, 'showShortlinkDetails']);
