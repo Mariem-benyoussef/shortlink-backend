@@ -28,25 +28,8 @@ class Shortlink extends Model
     //     'domaine' => 'tnbresa',
     // ];
 
-
     // Tu peux également utiliser $guarded pour spécifier les champs protégés
     protected $guarded = ['domaine'];  // 'domaine' est protégé et ne peut pas être modifié
-
-
-    // protected static function boot()
-    // {
-    //     parent::boot();
-
-    //     static::creating(function ($shortlink) {
-    //         if (empty($shortlink->chemin_personnalise)) {
-    //             do {
-    //                 $code = Str::random(8); // Génère un code de 8 caractères aléatoires
-    //             } while (self::where('chemin_personnalise', $code)->exists());
-
-    //             $shortlink->chemin_personnalise = $code;
-    //         }
-    //     });
-    // }
 
     protected static function boot()
     {
@@ -79,6 +62,13 @@ class Shortlink extends Model
         });
     }
 
+
+    public function clicks()
+    {
+        return $this->hasMany(Click::class);
+    }
+
+    
     // Fonction pour extraire le titre à partir du contenu HTML de la page
     protected static function extractTitleFromPage($destination)
     {

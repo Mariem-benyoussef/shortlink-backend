@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shortlink;
+use App\Models\Click;
+use Jenssegers\Agent\Agent;
 use App\Services\GoogleAnalyticsService;
 use Illuminate\Http\Request;
 
@@ -42,11 +44,27 @@ class ShortlinkController extends Controller
     }
 
     // Afficher un shortlink spécifique (en tant qu'API)
+    // public function show($id)
+    // {
+    //     $shortlink = Shortlink::findOrFail($id);
+    //     return response()->json($shortlink);
+    // }
+
+
     public function show($id)
     {
-        $shortlink = Shortlink::findOrFail($id);
-        return response()->json($shortlink);
+        $shortlink = Shortlink::with('clicks')->find($id);
+
+        if (!$shortlink) {
+            return response()->json(['error' => 'Shortlink not found'], 404);
+        }
+
+        return response()->json([
+            'shortlink' => $shortlink,
+            'clicks' => $shortlink->clicks,
+        ]);
     }
+
 
     // Mettre à jour un shortlink existant
     public function update(Request $request, $id)
@@ -129,5 +147,27 @@ class ShortlinkController extends Controller
         } catch (\Throwable $e) {
             return response()->json(['error' => 'Analytics data unavailable.', 'message' => $e->getMessage()], 500);
         }
+    }
+
+    public function redirect($chemin_personnalise, Request $request)
+    {
+        $shortlink = Shortlink::where('chemin_personnalise', $chemin_personnalise)->firstOrFail();
+
+        $agent = new Agent();
+        $agent->setUserAgent($request->header('User-Agent'));
+
+        // Récupérer le pays par géolocalisation si besoin (exemple simplifié)
+        $country = null;
+
+        Click::create([
+            'shortlink_id' => $shortlink->id,
+            'ip'           => $request->ip(),
+            'user_agent'   => $request->header('User-Agent'),
+            'referrer'     => $request->header('referer'),
+            'country'      => $country,
+            'device'       => $agent->device(),
+        ]);
+
+        return redirect($shortlink->destination);
     }
 }
