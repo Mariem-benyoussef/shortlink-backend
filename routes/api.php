@@ -38,4 +38,15 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
+Route::get('/get-users', [AuthController::class, 'getUsers']);
+Route::put('/edit-user/{id}', [AuthController::class, 'editUser']);
+Route::delete('/delete-user/{id}', [AuthController::class, 'deleteUser']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/get-profile', [AuthController::class, 'getProfile']);
+    Route::put('/update-profile', [AuthController::class, 'updateProfile']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
+
 Route::get('/{chemin_personnalise}', [ShortlinkController::class, 'redirect']);

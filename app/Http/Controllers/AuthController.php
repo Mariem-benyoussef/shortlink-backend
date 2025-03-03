@@ -69,7 +69,6 @@ class AuthController extends Controller
             : response()->json(['message' => __($status)], 400);
     }
 
-    // Reset Password
     public function resetPassword(Request $request)
     {
         $request->validate([
@@ -94,5 +93,115 @@ class AuthController extends Controller
         return $status === Password::PASSWORD_RESET
             ? response()->json(['message' => __($status)], 200)
             : response()->json(['message' => __($status)], 400);
+    }
+
+    public function getUsers(Request $request)
+    {
+        $users = User::all();
+        return response()->json(['users' => $users]);
+    }
+
+    public function editUser(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+
+        $user->update($request->all());
+
+        return response()->json(['message' => 'Utilisateur mis à jour avec succès', 'user' => $user]);
+    }
+
+    public function deleteUser($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+
+        $user->delete();
+
+        return response()->json(['message' => 'Utilisateur supprimé avec succès']);
+    }
+
+    public function getProfile(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+
+        return response()->json([
+            'message' => 'Profil récupéré avec succès',
+            'user' => $user,
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+
+        $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+        ]);
+
+        if ($request->has('name')) {
+            $user->name = $request->name;
+        }
+        if ($request->has('email')) {
+            $user->email = $request->email;
+        }
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profil mis à jour avec succès',
+            'user' => $user,
+        ]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Mot de passe actuel incorrect'], 400);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json(['message' => 'Mot de passe mis à jour avec succès']);
+    }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+
+        $user->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Déconnexion réussie']);
     }
 }
