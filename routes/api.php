@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DomaineController;
 use App\Http\Controllers\ShortlinkController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,16 @@ Route::post('shortlinks', [ShortlinkController::class, 'store']);
 Route::get('shortlinks/{id}', [ShortlinkController::class, 'show']);
 Route::put('shortlinks/{id}', [ShortlinkController::class, 'update']);
 Route::delete('shortlinks/{id}', [ShortlinkController::class, 'destroy']);
+
+
+Route::get('domaines', [DomaineController::class, 'index']);
+Route::post('domaines', [DomaineController::class, 'store']);
+Route::get('/domaines/{domaine}', [DomaineController::class, 'show']);
+Route::put('/domaines/{domaine}', [DomaineController::class, 'update']); 
+Route::delete('/domaines/{domaine}', [DomaineController::class, 'destroy']);
+
+Route::post('/domaines/set-default', [DomaineController::class, 'setDefaultDomain']);
+
 
 Route::post('/check-chemin-unique', [ShortlinkController::class, 'checkCheminUnique']);
 Route::post('/check-destination-unique', [ShortlinkController::class, 'checkDestinationUnique']);

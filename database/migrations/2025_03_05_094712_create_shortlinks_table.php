@@ -17,13 +17,17 @@ return new class extends Migration
             $table->id();
             $table->text('destination')->unique();
             $table->string('titre')->nullable();  // Facultatif
-            $table->string('domaine')->default('tnbresa');  // Valeur par défaut "tnbresa"
+            // $table->string('domaine')->default('tnbresa');  // Valeur par défaut "tnbresa"
             $table->string('chemin_personnalise')->nullable()->unique();  // Facultatif et unique
             $table->string('utm_term')->nullable();  // Facultatif
             $table->string('utm_content')->nullable();  // Facultatif
             $table->string('utm_campaign')->nullable();  // Facultatif
             $table->string('utm_source')->nullable();  // Facultatif
             $table->string('utm_medium')->nullable();  // Facultatif
+
+            // Foreign key to the domains table
+            $table->foreignId('domaine_id')->constrained('domaines')->onDelete('cascade');
+
             $table->timestamps();
         });
     }

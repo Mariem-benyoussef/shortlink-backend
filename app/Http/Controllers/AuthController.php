@@ -37,15 +37,20 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (!auth()->attempt($request->only('email', 'password'))) {
+        // if (!auth()->attempt($request->only('email', 'password'))) {
+        //     return response()->json(['message' => 'Invalid credentials'], 401);
+        // }
+        $user = User::where('email', $request->email)->first();
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $user = auth()->user();
+        // $user = auth()->user();
 
-        if ($user instanceof \App\Models\User) {
-            $token = $user->createToken($request->email)->plainTextToken;
-        }
+        // if ($user instanceof \App\Models\User) {
+        //     $token = $user->createToken($request->email)->plainTextToken;
+        // }
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',

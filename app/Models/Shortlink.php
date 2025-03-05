@@ -15,12 +15,13 @@ class Shortlink extends Model
     protected $fillable = [
         'destination',      // Obligatoire : à valider côté contrôleur
         'titre',            // Facultatif
-        'chemin_personnalise', // Facultatif, mais unique (contrainte à gérer dans la migration/validation)
-        'utm_term',         // Facultatif
-        'utm_content',      // Facultatif
-        'utm_campaign',     // Facultatif
-        'utm_source',       // Facultatif
-        'utm_medium',       // Facultatif
+        'chemin_personnalise', // Facultatif, mais unique
+        'utm_term',
+        'utm_content',
+        'utm_campaign',
+        'utm_source',
+        'utm_medium',
+        'domaine_id',
     ];
 
     // Valeurs par défaut pour certains attributs
@@ -29,8 +30,12 @@ class Shortlink extends Model
     // ];
 
     // Tu peux également utiliser $guarded pour spécifier les champs protégés
-    protected $guarded = ['domaine'];  // 'domaine' est protégé et ne peut pas être modifié
-
+    //protected $guarded = ['domaine'];  // 'domaine' est protégé et ne peut pas être modifié
+    // Définir la relation avec Domaine
+    public function domaine()
+    {
+        return $this->belongsTo(Domaine::class);
+    }
     protected static function boot()
     {
         parent::boot();
@@ -68,7 +73,7 @@ class Shortlink extends Model
         return $this->hasMany(Click::class);
     }
 
-    
+
     // Fonction pour extraire le titre à partir du contenu HTML de la page
     protected static function extractTitleFromPage($destination)
     {
