@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Shortlink;
 use App\Models\Click;
+use App\Models\Domaine;
 use Jenssegers\Agent\Agent;
 use App\Services\GoogleAnalyticsService;
 use Illuminate\Http\Request;
@@ -20,13 +21,18 @@ class ShortlinkController extends Controller
     // Afficher la liste des shortlinks (en tant qu'API)
     public function index()
     {
-        $shortlinks = Shortlink::all();
+        // $shortlinks = Shortlink::all();
+        // return response()->json($shortlinks);
+        $user = auth()->user();
+        $shortlinks = $user->shortlinks;  // Récupérer les shortlinks de l'utilisateur connecté
+
         return response()->json($shortlinks);
     }
 
     // Créer un nouveau shortlink (en tant qu'API)
     public function store(Request $request)
     {
+        // Valider les données de la requête
         $validated = $request->validate([
             'destination' => 'required|url',
             'titre' => 'nullable|string',
@@ -38,18 +44,28 @@ class ShortlinkController extends Controller
             'utm_content' => 'nullable|string',
         ]);
 
+        // Récupérer le domaine par défaut
+        $domaineParDefaut = Domaine::where('is_default', true)->first();
+
+        if (!$domaineParDefaut) {
+            return response()->json(['error' => 'Aucun domaine par défaut trouvé.'], 400);
+        }
+
+        // Ajouter l'ID du domaine par défaut aux données validées
+        $validated['domaine_id'] = $domaineParDefaut->id;
+
+
+        // Ajouter l'ID de l'utilisateur connecté aux données validées
+        $validated['user_id'] = auth()->id();  // Associer l'utilisateur connecté
+
+        // Créer le Shortlink
         $shortlink = Shortlink::create($validated);
 
-        return response()->json(['message' => 'Lien créé avec succès!', 'data' => $shortlink]);
+        return response()->json([
+            'message' => 'Lien créé avec succès!',
+            'data' => $shortlink,
+        ], 201);
     }
-
-    // Afficher un shortlink spécifique (en tant qu'API)
-    // public function show($id)
-    // {
-    //     $shortlink = Shortlink::findOrFail($id);
-    //     return response()->json($shortlink);
-    // }
-
 
     public function show($id)
     {

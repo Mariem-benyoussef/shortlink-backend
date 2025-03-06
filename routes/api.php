@@ -32,7 +32,7 @@ Route::delete('shortlinks/{id}', [ShortlinkController::class, 'destroy']);
 Route::get('domaines', [DomaineController::class, 'index']);
 Route::post('domaines', [DomaineController::class, 'store']);
 Route::get('/domaines/{domaine}', [DomaineController::class, 'show']);
-Route::put('/domaines/{domaine}', [DomaineController::class, 'update']); 
+Route::put('/domaines/{domaine}', [DomaineController::class, 'update']);
 Route::delete('/domaines/{domaine}', [DomaineController::class, 'destroy']);
 
 Route::post('/domaines/set-default', [DomaineController::class, 'setDefaultDomain']);

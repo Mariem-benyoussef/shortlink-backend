@@ -45,6 +45,12 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+
+    public function shortlinks()
+    {
+        return $this->hasMany(Shortlink::class);
+    }
+
     public function isAdmin()
     {
         return $this->role === 'admin';

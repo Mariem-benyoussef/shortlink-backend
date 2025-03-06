@@ -36,6 +36,12 @@ class Shortlink extends Model
     {
         return $this->belongsTo(Domaine::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     protected static function boot()
     {
         parent::boot();
