@@ -21,12 +21,20 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('shortlinks', [ShortlinkController::class, 'index']);
+    Route::post('shortlinks', [ShortlinkController::class, 'store']);
+    Route::get('shortlinks/{id}', [ShortlinkController::class, 'show']);
+    Route::put('shortlinks/{id}', [ShortlinkController::class, 'update']);
+    Route::delete('shortlinks/{id}', [ShortlinkController::class, 'destroy']);
+    Route::get('/shortlinksAnalytics', [ShortlinkController::class, 'getShortlinksInfo']);
+});
 
-Route::get('shortlinks', [ShortlinkController::class, 'index']);
-Route::post('shortlinks', [ShortlinkController::class, 'store']);
-Route::get('shortlinks/{id}', [ShortlinkController::class, 'show']);
-Route::put('shortlinks/{id}', [ShortlinkController::class, 'update']);
-Route::delete('shortlinks/{id}', [ShortlinkController::class, 'destroy']);
+// Route::get('shortlinks', [ShortlinkController::class, 'index']);
+// Route::post('shortlinks', [ShortlinkController::class, 'store']);
+// Route::get('shortlinks/{id}', [ShortlinkController::class, 'show']);
+// Route::put('shortlinks/{id}', [ShortlinkController::class, 'update']);
+// Route::delete('shortlinks/{id}', [ShortlinkController::class, 'destroy']);
 
 
 Route::get('domaines', [DomaineController::class, 'index']);
@@ -38,8 +46,13 @@ Route::delete('/domaines/{domaine}', [DomaineController::class, 'destroy']);
 Route::post('/domaines/set-default', [DomaineController::class, 'setDefaultDomain']);
 
 
-Route::post('/check-chemin-unique', [ShortlinkController::class, 'checkCheminUnique']);
-Route::post('/check-destination-unique', [ShortlinkController::class, 'checkDestinationUnique']);
+// Route::post('/check-chemin-unique', [ShortlinkController::class, 'checkCheminUnique']);
+// Route::post('/check-destination-unique', [ShortlinkController::class, 'checkDestinationUnique']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/check-destination', [ShortlinkController::class, 'checkDestinationUnique']);
+    Route::post('/check-chemin', [ShortlinkController::class, 'checkCheminUnique']);
+});
 
 Route::get('/shortlinks/destination/{destination}', [ShortlinkController::class, 'showShortlinkDetails'])
     ->where('destination', 'https?://.+');

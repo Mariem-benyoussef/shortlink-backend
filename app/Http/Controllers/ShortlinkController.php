@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Shortlink;
 use App\Models\Click;
+use App\Models\User;
 use App\Models\Domaine;
 use Jenssegers\Agent\Agent;
 use App\Services\GoogleAnalyticsService;
@@ -18,21 +19,17 @@ class ShortlinkController extends Controller
         $this->analyticsService = $analyticsService;
     }
 
-    // Afficher la liste des shortlinks (en tant qu'API)
     public function index()
     {
-        // $shortlinks = Shortlink::all();
-        // return response()->json($shortlinks);
         $user = auth()->user();
-        $shortlinks = $user->shortlinks;  // Récupérer les shortlinks de l'utilisateur connecté
-
+        $shortlinks = $user->shortlinks; // Utilisation de la relation
         return response()->json($shortlinks);
     }
 
-    // Créer un nouveau shortlink (en tant qu'API)
     public function store(Request $request)
     {
-        // Valider les données de la requête
+        $user = auth()->user();
+
         $validated = $request->validate([
             'destination' => 'required|url',
             'titre' => 'nullable|string',
@@ -44,22 +41,16 @@ class ShortlinkController extends Controller
             'utm_content' => 'nullable|string',
         ]);
 
-        // Récupérer le domaine par défaut
         $domaineParDefaut = Domaine::where('is_default', true)->first();
 
         if (!$domaineParDefaut) {
             return response()->json(['error' => 'Aucun domaine par défaut trouvé.'], 400);
         }
 
-        // Ajouter l'ID du domaine par défaut aux données validées
         $validated['domaine_id'] = $domaineParDefaut->id;
+        $validated['user_id'] = $user->id; // Associer le shortlink à l'utilisateur connecté
 
-
-        // Ajouter l'ID de l'utilisateur connecté aux données validées
-        $validated['user_id'] = auth()->id();  // Associer l'utilisateur connecté
-
-        // Créer le Shortlink
-        $shortlink = Shortlink::create($validated);
+        $shortlink = $user->shortlinks()->create($validated); // Utilisation de la relation
 
         return response()->json([
             'message' => 'Lien créé avec succès!',
@@ -69,10 +60,11 @@ class ShortlinkController extends Controller
 
     public function show($id)
     {
-        $shortlink = Shortlink::with('clicks')->find($id);
+        $user = auth()->user();
+        $shortlink = $user->shortlinks()->with('clicks')->find($id); // Utilisation de la relation
 
         if (!$shortlink) {
-            return response()->json(['error' => 'Shortlink not found'], 404);
+            return response()->json(['error' => 'Shortlink not found or not owned by you'], 404);
         }
 
         return response()->json([
@@ -81,13 +73,17 @@ class ShortlinkController extends Controller
         ]);
     }
 
-
-    // Mettre à jour un shortlink existant
     public function update(Request $request, $id)
     {
-        // Validation des données
+        $user = auth()->user();
+        $shortlink = $user->shortlinks()->find($id); // Utilisation de la relation
+
+        if (!$shortlink) {
+            return response()->json(['error' => 'Shortlink not found or not owned by you'], 404);
+        }
+
         $validated = $request->validate([
-            'destination' => 'required|url',
+            'destination' => 'required|url|unique:shortlinks,destination,' . $id,
             'titre' => 'nullable|string',
             'chemin_personnalise' => 'nullable|unique:shortlinks,chemin_personnalise,' . $id,
             'utm_source' => 'nullable|string',
@@ -97,29 +93,24 @@ class ShortlinkController extends Controller
             'utm_content' => 'nullable|string',
         ]);
 
-        // Trouver le shortlink à mettre à jour
-        $shortlink = Shortlink::findOrFail($id);
-
-        // Mettre à jour les données du shortlink
         $shortlink->update($validated);
 
-        // Retourner la réponse JSON avec le shortlink mis à jour
         return response()->json($shortlink);
     }
 
-    // Supprimer un shortlink
     public function destroy($id)
     {
-        // Trouver le shortlink à supprimer
-        $shortlink = Shortlink::findOrFail($id);
+        $user = auth()->user();
+        $shortlink = $user->shortlinks()->find($id); // Utilisation de la relation
 
-        // Supprimer le shortlink
+        if (!$shortlink) {
+            return response()->json(['error' => 'Shortlink not found or not owned by you'], 404);
+        }
+
         $shortlink->delete();
 
-        // Retourner une réponse de succès
         return response()->json(['message' => 'Shortlink deleted successfully']);
     }
-
 
     // Vérifier si le chemin personnalisé est unique
     public function checkCheminUnique(Request $request)
@@ -185,5 +176,51 @@ class ShortlinkController extends Controller
         ]);
 
         return redirect($shortlink->destination);
+    }
+
+
+    public function getShortlinksInfo(Request $request)
+    {
+        $user = $request->user();
+        $shortlinks = Shortlink::where('user_id', $user->id)->get();
+
+        $analytics = [];
+
+        foreach ($shortlinks as $shortlink) {
+            $clicks = Click::where('shortlink_id', $shortlink->id)->get();
+
+            $countryAnalytics = [];
+            $deviceAnalytics = [];
+            $ipAnalytics = [];
+            $referrerAnalytics = [];
+            $totalClicks = 0;
+
+            foreach ($clicks as $click) {
+                $country = $click->country ?? 'Inconnu';
+                $countryAnalytics[$country] = ($countryAnalytics[$country] ?? 0) + 1;
+
+                $device = $click->device ?? 'Inconnu';
+                $deviceAnalytics[$device] = ($deviceAnalytics[$device] ?? 0) + 1;
+
+                $ip = $click->ip;
+                $ipAnalytics[$ip] = ($ipAnalytics[$ip] ?? 0) + 1;
+
+                $referrer = $click->referrer ?? 'Inconnu';
+                $referrerAnalytics[$referrer] = ($referrerAnalytics[$referrer] ?? 0) + 1;
+
+                $totalClicks++;
+            }
+
+            $analytics[] = [
+                'shortlink' => $shortlink->chemin_personnalise,
+                'country' => $countryAnalytics,
+                'device' => $deviceAnalytics,
+                'total_clicks' => $totalClicks,
+                'ip' => $ipAnalytics,
+                'referrer' => $referrerAnalytics,
+            ];
+        }
+
+        return response()->json($analytics);
     }
 }
