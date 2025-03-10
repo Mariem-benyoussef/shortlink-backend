@@ -48,9 +48,9 @@ class Shortlink extends Model
 
         static::creating(function ($shortlink) {
             // Vérifier l'unicité de la destination
-            if (self::where('destination', $shortlink->destination)->exists()) {
-                throw new \Exception('La destination doit être unique.');
-            }
+            // if (self::where('destination', $shortlink->destination)->exists()) {
+            //     throw new \Exception('La destination doit être unique.');
+            // }
 
             // Vérifier l'unicité du chemin personnalisé
             if ($shortlink->chemin_personnalise && self::where('chemin_personnalise', $shortlink->chemin_personnalise)->exists()) {

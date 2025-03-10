@@ -45,14 +45,13 @@ Route::delete('/domaines/{domaine}', [DomaineController::class, 'destroy']);
 
 Route::post('/domaines/set-default', [DomaineController::class, 'setDefaultDomain']);
 
+Route::post('check-chemin-unique', [ShortlinkController::class, 'checkCheminUnique']);
+Route::post('check-destination-unique', [ShortlinkController::class, 'checkDestinationUnique']);
 
-// Route::post('/check-chemin-unique', [ShortlinkController::class, 'checkCheminUnique']);
-// Route::post('/check-destination-unique', [ShortlinkController::class, 'checkDestinationUnique']);
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/check-destination', [ShortlinkController::class, 'checkDestinationUnique']);
-    Route::post('/check-chemin', [ShortlinkController::class, 'checkCheminUnique']);
-});
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::post('/check-destination-unique', [ShortlinkController::class, 'checkDestinationUnique']);
+//     Route::post('/check-chemin-unique', [ShortlinkController::class, 'checkCheminUnique']);
+// });
 
 Route::get('/shortlinks/destination/{destination}', [ShortlinkController::class, 'showShortlinkDetails'])
     ->where('destination', 'https?://.+');

@@ -15,7 +15,8 @@ return new class extends Migration
     {
         Schema::create('shortlinks', function (Blueprint $table) {
             $table->id();
-            $table->text('destination')->unique();
+            // $table->text('destination')->unique();
+            $table->text('destination');
             $table->string('titre')->nullable();  // Facultatif
             // $table->string('domaine')->default('tnbresa');  // Valeur par défaut "tnbresa"
             $table->string('chemin_personnalise')->nullable()->unique();  // Facultatif et unique

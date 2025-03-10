@@ -83,7 +83,7 @@ class ShortlinkController extends Controller
         }
 
         $validated = $request->validate([
-            'destination' => 'required|url|unique:shortlinks,destination,' . $id,
+            'destination' => 'required|url',
             'titre' => 'nullable|string',
             'chemin_personnalise' => 'nullable|unique:shortlinks,chemin_personnalise,' . $id,
             'utm_source' => 'nullable|string',
